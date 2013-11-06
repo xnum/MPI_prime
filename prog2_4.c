@@ -5,7 +5,7 @@
 
 int prime(int rank , int size , unsigned int num)
 {
-    unsigned int i,j,lo=0;
+    unsigned int i,j,k=0;
 
     int *table = (int*)malloc(46341 * sizeof(int)),*t= (int*)malloc(4792*sizeof(int));
 
@@ -16,39 +16,24 @@ int prime(int rank , int size , unsigned int num)
         table[i] = 0;
     
 
+    int c = 0;
     for(i=2 ; i<46341 ; ++i)
-    {
         if( 0==table[i] )
         {
-            for(lo = 46340/i,j=i*lo;lo>=i;--lo,j-=i)
-                if(table[lo] == 0)
+            t[c++] = i;
+            for(k = 46340/i,j=i*k;k>=i;--k,j-=i)
+                if(table[k] == 0)
                     table[j] = 1;
         }
-    
-    }
-    
-    int c = 0;
-    for( i=0 ; i<46340 ; ++i )
-    {
-        if(table[i] == 0){
-            t[c++] = i;
-        }
-    }
-    
+                
     unsigned int *pr = (unsigned int*)malloc(sizeof(unsigned int) * (1<<27) );
 
     for( i = 0 ; i <= 1<<27 ; ++i )
-    {   
         pr[i] = 0;
-    }
    
     for( j=0 ; j<c ; ++j )
-    {
         for(i=t[j]*t[j] ; i<=num; i += t[j] )
-        {
                 pr[i>>5] |= (1 << (i&0x1f)) ;
-        }
-    }
 
     int o=0;
 
