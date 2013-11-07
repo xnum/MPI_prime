@@ -51,7 +51,7 @@ int prime(int rank , int size , unsigned int num)
     printf("time after build table= %lf s\n",time);
     time = MPI_Wtime();
 
-    for( j=0 ; t[j]*t[j] < num ; j++ ) 
+    for( j=1 ; t[j]*t[j] < num ; j++ ) 
     {
         //if(t[j]==7)printf("%d %d %d %d\n",rank,size,low_bound,high_bound);
         i = t[j] * t[j];
@@ -63,9 +63,11 @@ int prime(int rank , int size , unsigned int num)
         }
         else
             i -= low_bound;
+        if( (i+low_bound) % 2 == 0 )i += t[j];
         while( i <= bound - low_bound ){
             pr[i>>5] |= (1 << (i&0x1f)) ;
-            i += t[j];
+            i += (t[j]+t[j]);
+            //printf("%d %d\n",i+low_bound,t[j]);
             //printf("%d=1\n",i+low_bound);
         }
     }
@@ -75,6 +77,7 @@ int prime(int rank , int size , unsigned int num)
     time = MPI_Wtime();
     int o=0;
 
+    /*
     for( i = 0 ; i <= ((bound-low_bound)>>5)-1 ; ++i )
     {
         unsigned int tmp = ~pr[i];
@@ -85,9 +88,10 @@ int prime(int rank , int size , unsigned int num)
             tmp = tmp >> 1;
         }
     }
-    
+    */
 
-    for( i= (((bound-low_bound)>>5)<<5) ; i <= bound-low_bound ; ++i )
+    //for( i= (((bound-low_bound)>>5)<<5) ; i <= bound-low_bound ; ++i )
+    for( i = !(low_bound&1) ; i <= bound-low_bound ; i += 2 )
     {
         if( (pr[i>>5]&(1 << (i&0x1f)))  ==0){
             o++;
@@ -100,7 +104,7 @@ int prime(int rank , int size , unsigned int num)
 
     MPI_Reduce( &o , &result , 1 , MPI_INT , MPI_SUM , 0 , MPI_COMM_WORLD );
     if(rank == 0)
-        printf("prime: %d\n",result);
+        printf("prime: %d\n",result+1);
     
     MPI_Barrier(MPI_COMM_WORLD);
     
