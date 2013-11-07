@@ -28,9 +28,6 @@ int prime(int rank , int size , unsigned int num)
                     table[j] = 1;
         }
     
-    time = MPI_Wtime()-time;
-    printf("time after build table= %lf s\n",time);
-    time = MPI_Wtime();
     int block = num / 32 / size + 1 ;
     unsigned int *pr = (unsigned int*)malloc(sizeof(unsigned int) * block );
 
@@ -50,6 +47,9 @@ int prime(int rank , int size , unsigned int num)
     else
         bound = high_bound;
 
+    time = MPI_Wtime()-time;
+    printf("time after build table= %lf s\n",time);
+    time = MPI_Wtime();
 
     for( j=0 ; t[j]*t[j] < num ; j++ ) 
     {
@@ -70,9 +70,24 @@ int prime(int rank , int size , unsigned int num)
         }
     }
 
+    time = MPI_Wtime()-time;
+    printf("time after calu= %lf s\n",time);
+    time = MPI_Wtime();
     int o=0;
 
-    for( i=0 ; i <= bound-low_bound ; ++i )
+    for( i = 0 ; i <= ((bound-low_bound)>>5)-1 ; ++i )
+    {
+        unsigned int tmp = ~pr[i];
+        while(tmp)
+        {
+            if(tmp&1)
+                o++;
+            tmp = tmp >> 1;
+        }
+    }
+    
+
+    for( i= (((bound-low_bound)>>5)<<5) ; i <= bound-low_bound ; ++i )
     {
         if( (pr[i>>5]&(1 << (i&0x1f)))  ==0){
             o++;
@@ -83,9 +98,6 @@ int prime(int rank , int size , unsigned int num)
 
     int result = 0;
 
-    time = MPI_Wtime()-time;
-    printf("time after calu= %lf s\n",time);
-    time = MPI_Wtime();
     MPI_Reduce( &o , &result , 1 , MPI_INT , MPI_SUM , 0 , MPI_COMM_WORLD );
     if(rank == 0)
         printf("prime: %d\n",result);
@@ -107,7 +119,7 @@ int main(int argc, char *argv[])
     int rank = 0;
     int size = 1;
 
-    unsigned int n =2100000000;
+    unsigned int n = 2100000000;
 
     MPI_Init(&argc,&argv);
     MPI_Comm_size(MPI_COMM_WORLD,&size);
