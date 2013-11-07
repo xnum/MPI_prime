@@ -1,4 +1,4 @@
 
 
-main: prog2_4.c
-	gcc prog2_4.c -o main
+main: prog2_4mpi.c
+	mpicc prog2_4mpi.c -o main
