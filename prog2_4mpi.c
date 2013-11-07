@@ -43,8 +43,6 @@ int prime(int rank , int size , unsigned int num)
             o++;
     }
 
-    printf("prime=%d \n",o);
-
     free(pr);
     free(table);
     free(t);
