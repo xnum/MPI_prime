@@ -1,20 +1,13 @@
 #include <stdlib.h>
 #include <time.h>
 #include <stdio.h>
-//  #include "mpi.h"
 
 int prime(int rank , int size , unsigned int num)
 {
     unsigned int i,j,k=0;
 
-    int *table = (int*)malloc(46341 * sizeof(int)),*t= (int*)malloc(4792*sizeof(int));
-
-    table[0] = 1;
-    table[1] = 1;
-
-    for( i=2 ; i<46341 ; ++i )
-        table[i] = 0;
-    
+    int *table = (int*)calloc(46341 , sizeof(int))
+       ,*t     = (int*)calloc( 4792 , sizeof(int));
 
     int c = 0;
     for(i=2 ; i<46341 ; ++i)
@@ -26,27 +19,22 @@ int prime(int rank , int size , unsigned int num)
                     table[j] = 1;
         }
                 
-    unsigned int *pr = (unsigned int*)malloc(sizeof(unsigned int) * (1<<27) );
+    unsigned int *pr = (unsigned int*)calloc(num / 32 + 1 , sizeof(unsigned int));
 
-    for( i = 0 ; i <= 1<<27 ; ++i )
-        pr[i] = 0;
-   
     for( j=0 ; j<c ; ++j )
-        for(i=t[j]*t[j] ; i<=num; i += t[j] )
+        for(i=t[j]*t[j] ; i<=num; i += (t[j]<<1) )
                 pr[i>>5] |= (1 << (i&0x1f)) ;
 
     int o=0;
 
-    for( i=2 ; i <= num ; ++i )
-    {
-        if( (pr[i>>5]&(1 << (i&0x1f)))  ==0)
+    for( i=3 ; i <= num ; i += 2 )
+        if( (pr[i>>5]&(1 << (i&0x1f)))  == 0 )
             o++;
-    }
 
     free(pr);
     free(table);
     free(t);
-    return o;
+    return o+1;
 }
 
 
